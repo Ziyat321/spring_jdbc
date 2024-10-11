@@ -1,16 +1,16 @@
 drop table if exists products cascade;
 drop table if exists categories cascade;
 
-create table if not exists categories
+create table categories
 (
-    id   serial8 primary key,
-    name varchar not null
+    id   serial primary key,
+    name varchar(255) not null unique
 );
 
-create table if not exists products
+create table products
 (
-    id   serial8 primary key,
-    name varchar not null,
-    category_id int8 not null,
-    foreign key (category_id) references categories(id)
+    id          serial primary key,
+    name        varchar(255)                    not null,
+    price       double precision                not null,
+    category_id int references categories (id) not null
 );

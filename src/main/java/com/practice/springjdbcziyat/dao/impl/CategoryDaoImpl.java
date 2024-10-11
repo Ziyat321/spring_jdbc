@@ -2,7 +2,7 @@ package com.practice.springjdbcziyat.dao.impl;
 
 
 import com.practice.springjdbcziyat.dao.CategoryDao;
-import com.practice.springjdbcziyat.exception.ExistsException;
+import com.practice.springjdbcziyat.exception.NotFoundException;
 import com.practice.springjdbcziyat.model.Category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,22 +30,16 @@ public class CategoryDaoImpl implements CategoryDao {
         String sql = "select * from categories where id = ?";
         return jdbcTemplate.queryForStream(sql, this::mapRow, id)
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Категории с данным " + id + " не существует"));
+                .orElseThrow(() -> new NotFoundException("Категории с данным " + id + " не существует"));
     }
 
     @Override
     public Category create(Category category) {
-        String categoryName = category.getName();
-        findAll().stream()
-                .filter(c -> c.getName().equals(categoryName))
-                .findFirst()
-                .ifPresent(c -> {throw new ExistsException("Категория с данным названием уже существует");});
-
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("categories")
                 .usingGeneratedKeyColumns("id");
 
-        Map<String, Object> params = Map.of("name", categoryName);
+        Map<String, Object> params = Map.of("name", category.getName());
         int id = insert.executeAndReturnKey(params).intValue();
         category.setId(id);
         return category;
